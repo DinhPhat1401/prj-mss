@@ -14,13 +14,14 @@ import { ManualInputScreen } from './src/screens/ManualInputScreen';
 import { FRIStatusScreen } from './src/screens/FRIStatusScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { ProgressAnalyticsScreen } from './src/screens/ProgressAnalyticsScreen';
+import { NotificationSettingsScreen } from './src/screens/NotificationSettingsScreen';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST' | 'WORKOUTS' | 'WORKOUT_DETAIL' | 'MANUAL_INPUT' | 'FRI_STATUS' | 'HISTORY' | 'PROGRESS'>('DASHBOARD');
+  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST' | 'WORKOUTS' | 'WORKOUT_DETAIL' | 'MANUAL_INPUT' | 'FRI_STATUS' | 'HISTORY' | 'PROGRESS' | 'NOTIFICATIONS'>('DASHBOARD');
   const [selectedMeal, setSelectedMeal] = useState<any>(null);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
@@ -72,6 +73,8 @@ export default function App() {
         <HistoryScreen onBack={() => setCurrentScreen('DASHBOARD')} />
       ) : currentScreen === 'PROGRESS' ? (
         <ProgressAnalyticsScreen onBack={() => setCurrentScreen('DASHBOARD')} />
+      ) : currentScreen === 'NOTIFICATIONS' ? (
+        <NotificationSettingsScreen onBack={() => setCurrentScreen('DASHBOARD')} />
       ) : (
         <DashboardScreen profile={profile} onNavigate={(screen: any) => setCurrentScreen(screen)} />
       )}
