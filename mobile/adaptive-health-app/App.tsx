@@ -8,14 +8,18 @@ import { WearableConnectScreen } from './src/screens/WearableConnectScreen';
 import { MealPlanScreen } from './src/screens/MealPlanScreen';
 import { MealDetailScreen } from './src/screens/MealDetailScreen';
 import { BlacklistScreen } from './src/screens/BlacklistScreen';
+import { WorkoutPlanScreen } from './src/screens/WorkoutPlanScreen';
+import { WorkoutDetailScreen } from './src/screens/WorkoutDetailScreen';
+import { ManualInputScreen } from './src/screens/ManualInputScreen';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST'>('DASHBOARD');
+  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST' | 'WORKOUTS' | 'WORKOUT_DETAIL' | 'MANUAL_INPUT'>('DASHBOARD');
   const [selectedMeal, setSelectedMeal] = useState<any>(null);
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
   const handleLoginSuccess = (authToken: string, uid: string, name: string) => {
     setToken(authToken);
@@ -49,6 +53,16 @@ export default function App() {
         <MealDetailScreen meal={selectedMeal} onBack={() => setCurrentScreen('MEALS')} />
       ) : currentScreen === 'BLACKLIST' ? (
         <BlacklistScreen userId={userId} onBack={() => setCurrentScreen('MEALS')} />
+      ) : currentScreen === 'WORKOUTS' ? (
+        <WorkoutPlanScreen
+          onSelectWorkout={(w) => { setSelectedWorkout(w); setCurrentScreen('WORKOUT_DETAIL'); }}
+          onNavigateManualInput={() => setCurrentScreen('MANUAL_INPUT')}
+          onBack={() => setCurrentScreen('DASHBOARD')}
+        />
+      ) : currentScreen === 'WORKOUT_DETAIL' ? (
+        <WorkoutDetailScreen workout={selectedWorkout} onBack={() => setCurrentScreen('WORKOUTS')} />
+      ) : currentScreen === 'MANUAL_INPUT' ? (
+        <ManualInputScreen userId={userId} onBack={() => setCurrentScreen('DASHBOARD')} />
       ) : (
         <DashboardScreen profile={profile} onNavigate={(screen: any) => setCurrentScreen(screen)} />
       )}
