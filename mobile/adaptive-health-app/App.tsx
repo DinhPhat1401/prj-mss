@@ -11,13 +11,16 @@ import { BlacklistScreen } from './src/screens/BlacklistScreen';
 import { WorkoutPlanScreen } from './src/screens/WorkoutPlanScreen';
 import { WorkoutDetailScreen } from './src/screens/WorkoutDetailScreen';
 import { ManualInputScreen } from './src/screens/ManualInputScreen';
+import { FRIStatusScreen } from './src/screens/FRIStatusScreen';
+import { HistoryScreen } from './src/screens/HistoryScreen';
+import { ProgressAnalyticsScreen } from './src/screens/ProgressAnalyticsScreen';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST' | 'WORKOUTS' | 'WORKOUT_DETAIL' | 'MANUAL_INPUT'>('DASHBOARD');
+  const [currentScreen, setCurrentScreen] = useState<'DASHBOARD' | 'WEARABLE' | 'PROFILE' | 'MEALS' | 'MEAL_DETAIL' | 'BLACKLIST' | 'WORKOUTS' | 'WORKOUT_DETAIL' | 'MANUAL_INPUT' | 'FRI_STATUS' | 'HISTORY' | 'PROGRESS'>('DASHBOARD');
   const [selectedMeal, setSelectedMeal] = useState<any>(null);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
@@ -63,6 +66,12 @@ export default function App() {
         <WorkoutDetailScreen workout={selectedWorkout} onBack={() => setCurrentScreen('WORKOUTS')} />
       ) : currentScreen === 'MANUAL_INPUT' ? (
         <ManualInputScreen userId={userId} onBack={() => setCurrentScreen('DASHBOARD')} />
+      ) : currentScreen === 'FRI_STATUS' ? (
+        <FRIStatusScreen onBack={() => setCurrentScreen('DASHBOARD')} />
+      ) : currentScreen === 'HISTORY' ? (
+        <HistoryScreen onBack={() => setCurrentScreen('DASHBOARD')} />
+      ) : currentScreen === 'PROGRESS' ? (
+        <ProgressAnalyticsScreen onBack={() => setCurrentScreen('DASHBOARD')} />
       ) : (
         <DashboardScreen profile={profile} onNavigate={(screen: any) => setCurrentScreen(screen)} />
       )}
