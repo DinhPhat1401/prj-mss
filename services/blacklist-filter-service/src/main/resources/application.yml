@@ -1,0 +1,19 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: blacklist-filter-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mss_db}
+    username: ${SPRING_DATASOURCE_USERNAME:mss_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:mss_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
