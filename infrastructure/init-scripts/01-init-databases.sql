@@ -6,6 +6,8 @@
 -- 1. Create Separate Databases for Microservices
 CREATE DATABASE auth_db;
 CREATE DATABASE user_db;
+CREATE DATABASE wearable_db;
+CREATE DATABASE health_db;
 CREATE DATABASE blacklist_db;
 CREATE DATABASE history_db;
 
@@ -54,8 +56,37 @@ VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 25, 'MALE', 175.0, 70.0, 'LOSE_W
 ON CONFLICT (user_id) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
--- 4. Blacklist Filter Service Database (blacklist_db)
+-- 4. Wearable Sync Service Database (wearable_db)
 -- -----------------------------------------------------------------------------
+\c wearable_db;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS wearable_sync_records (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    provider VARCHAR(50),
+    processed_points INT,
+    status VARCHAR(50),
+    synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------------------------------
+-- 5. Health Assessment Service Database (health_db)
+-- -----------------------------------------------------------------------------
+\c health_db;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS health_assessment_records (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL,
+    fri_score DOUBLE PRECISION,
+    status VARCHAR(50),
+    alpha_intensity DOUBLE PRECISION,
+    current_rhr DOUBLE PRECISION,
+    base_rhr DOUBLE PRECISION,
+    sleep_hours DOUBLE PRECISION,
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 \c blacklist_db;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
