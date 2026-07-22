@@ -42,4 +42,10 @@ public class BlacklistController {
     public ResponseEntity<List<FoodAllergy>> getUserAllergies(@PathVariable UUID userId) {
         return ResponseEntity.ok(blacklistService.getUserAllergies(userId));
     }
+
+    @PostMapping("/validate-meal-plan")
+    public ResponseEntity<com.mss.blacklistservice.dto.MealPlanValidationResponse> validateMealPlan(
+            @RequestBody com.mss.blacklistservice.dto.MealPlanValidationRequest request) {
+        return ResponseEntity.ok(blacklistService.validateMealPlan(request));
+    }
 }

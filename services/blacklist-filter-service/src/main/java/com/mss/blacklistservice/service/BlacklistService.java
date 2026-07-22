@@ -62,6 +62,42 @@ public class BlacklistService {
         return allergyRepository.findByUserId(userId);
     }
 
+    public com.mss.blacklistservice.dto.MealPlanValidationResponse validateMealPlan(com.mss.blacklistservice.dto.MealPlanValidationRequest request) {
+        List<String> blacklist = getUserBlacklist(request.getUserId());
+        List<FoodAllergy> allergies = getUserAllergies(request.getUserId());
+        List<String> allergenNames = allergies.stream().map(a -> a.getAllergen().toLowerCase()).toList();
+
+        List<com.mss.blacklistservice.dto.MealPlanValidationResponse.ViolationDetail> violations = new java.util.ArrayList<>();
+
+        if (request.getItems() != null) {
+            for (var item : request.getItems()) {
+                String nameLower = item.getMealName().toLowerCase();
+                List<String> ingredientsLower = item.getIngredients() != null ?
+                        item.getIngredients().stream().map(String::toLowerCase).toList() : List.of();
+
+                for (String blocked : blacklist) {
+                    if (nameLower.contains(blocked) || ingredientsLower.stream().anyMatch(ing -> ing.contains(blocked))) {
+                        violations.add(new com.mss.blacklistservice.dto.MealPlanValidationResponse.ViolationDetail(
+                                item.getMealName(), blocked, "Trùng thực phẩm trong Blacklist cá nhân"));
+                    }
+                }
+
+                for (String allergen : allergenNames) {
+                    if (nameLower.contains(allergen) || ingredientsLower.stream().anyMatch(ing -> ing.contains(allergen))) {
+                        violations.add(new com.mss.blacklistservice.dto.MealPlanValidationResponse.ViolationDetail(
+                                item.getMealName(), allergen, "Chứa chất gây dị ứng nguy hiểm!"));
+                    }
+                }
+            }
+        }
+
+        return com.mss.blacklistservice.dto.MealPlanValidationResponse.builder()
+                .valid(violations.isEmpty())
+                .totalViolations(violations.size())
+                .violations(violations)
+                .build();
+    }
+
     private void evictCache(UUID userId) {
         redisTemplate.delete("BL:" + userId);
     }
