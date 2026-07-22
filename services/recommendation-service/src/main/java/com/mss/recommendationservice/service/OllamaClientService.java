@@ -3,19 +3,17 @@ package com.mss.recommendationservice.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mss.recommendationservice.dto.RecommendationRequest;
 import com.mss.recommendationservice.dto.RecommendationResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class OllamaClientService {
 
@@ -23,11 +21,20 @@ public class OllamaClientService {
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${ollama.base-url:http://localhost:11434}")
+    @Value("${spring.ai.ollama.base-url:http://localhost:11434}")
     private String ollamaBaseUrl;
 
-    @Value("${ollama.model:llama3}")
+    @Value("${spring.ai.ollama.chat.model:minimax-m3:cloud}")
     private String ollamaModel;
+
+    @Autowired
+    public OllamaClientService(PromptBuilder promptBuilder,
+                               StringRedisTemplate redisTemplate,
+                               ObjectMapper objectMapper) {
+        this.promptBuilder = promptBuilder;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     public RecommendationResponse generateRecommendation(RecommendationRequest request) {
         String cacheKey = "RECO:" + request.getUserId();
@@ -43,9 +50,9 @@ public class OllamaClientService {
         }
 
         String prompt = promptBuilder.buildPrompt(request);
-        log.info("Calling Ollama LLM at {} with model {}", ollamaBaseUrl, ollamaModel);
+        log.info("Calling Spring AI Ollama at {} with model {}", ollamaBaseUrl, ollamaModel);
 
-        // Fallback / Guardrail Structured Output
+        // Fallback / Guardrail Structured Output Response
         RecommendationResponse response = RecommendationResponse.builder()
                 .recommendationId(java.util.UUID.randomUUID().toString())
                 .llmModel(ollamaModel)
