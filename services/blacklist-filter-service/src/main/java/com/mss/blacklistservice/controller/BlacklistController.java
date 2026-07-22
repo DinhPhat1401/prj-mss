@@ -16,6 +16,7 @@ import java.util.UUID;
 public class BlacklistController {
 
     private final BlacklistService blacklistService;
+    private final com.mss.blacklistservice.service.FoodReplacementService foodReplacementService;
 
     @PostMapping("/{userId}")
     public ResponseEntity<FoodBlacklist> addBlacklist(
@@ -47,5 +48,13 @@ public class BlacklistController {
     public ResponseEntity<com.mss.blacklistservice.dto.MealPlanValidationResponse> validateMealPlan(
             @RequestBody com.mss.blacklistservice.dto.MealPlanValidationRequest request) {
         return ResponseEntity.ok(blacklistService.validateMealPlan(request));
+    }
+
+    @PostMapping("/replace-food")
+    public ResponseEntity<com.mss.blacklistservice.service.FoodReplacementService.FoodMacro> replaceFood(
+            @RequestBody com.mss.blacklistservice.service.FoodReplacementService.FoodMacro originalFood,
+            @RequestParam UUID userId) {
+        List<String> blacklist = blacklistService.getUserBlacklist(userId);
+        return ResponseEntity.ok(foodReplacementService.findBestReplacement(originalFood, blacklist));
     }
 }
