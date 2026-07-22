@@ -5,7 +5,7 @@ spring:
   application:
     name: history-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/mss_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/history_db}
     username: ${SPRING_DATASOURCE_USERNAME:mss_user}
     password: ${SPRING_DATASOURCE_PASSWORD:mss_password}
     driver-class-name: org.postgresql.Driver

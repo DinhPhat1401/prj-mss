@@ -1,14 +1,20 @@
 -- =============================================================================
--- MSSPRJ Microservices Database Initialization Script
--- Auto-executed on PostgreSQL container startup
+-- Database-per-Service Architecture Initialization Script
+-- Creates isolated databases for each microservice
 -- =============================================================================
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- 1. Create Separate Databases for Microservices
+CREATE DATABASE auth_db;
+CREATE DATABASE user_db;
+CREATE DATABASE blacklist_db;
+CREATE DATABASE history_db;
 
 -- -----------------------------------------------------------------------------
--- 1. Auth Service Database Tables
+-- 2. Auth Service Database (auth_db)
 -- -----------------------------------------------------------------------------
+\c auth_db;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS user_auth (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -19,9 +25,15 @@ CREATE TABLE IF NOT EXISTS user_auth (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO user_auth (id, email, password_hash, full_name, role)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'demo@mss.com', '$2a$10$e8wEaLq4H7N2ZtJ4wK9s.O2d9/1X3W0X9Y8Z7A6B5C4D3E2F1G0H', 'Nguyễn Văn Demo')
+ON CONFLICT (email) DO NOTHING;
+
 -- -----------------------------------------------------------------------------
--- 2. User Service Database Tables
+-- 3. User Service Database (user_db)
 -- -----------------------------------------------------------------------------
+\c user_db;
+
 CREATE TABLE IF NOT EXISTS user_profiles (
     user_id UUID PRIMARY KEY,
     age INT NOT NULL,
@@ -37,9 +49,16 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO user_profiles (user_id, age, gender, height_cm, weight_kg, fitness_goal, activity_level, bmr, tdee, target_calories)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 25, 'MALE', 175.0, 70.0, 'LOSE_WEIGHT', 'MODERATELY_ACTIVE', 1680.0, 2604.0, 2104.0)
+ON CONFLICT (user_id) DO NOTHING;
+
 -- -----------------------------------------------------------------------------
--- 3. Blacklist Filter Service Database Tables
+-- 4. Blacklist Filter Service Database (blacklist_db)
 -- -----------------------------------------------------------------------------
+\c blacklist_db;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS food_blacklist (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL,
@@ -56,9 +75,18 @@ CREATE TABLE IF NOT EXISTS food_allergies (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO food_blacklist (user_id, food_name, reason)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'cần tây', 'DISLIKE');
+
+INSERT INTO food_allergies (user_id, allergen, severity)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'SEAFOOD', 'HIGH');
+
 -- -----------------------------------------------------------------------------
--- 4. History & Analytics Service Database Tables
+-- 5. History & Analytics Service Database (history_db)
 -- -----------------------------------------------------------------------------
+\c history_db;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS recommendation_history (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL,
@@ -69,20 +97,3 @@ CREATE TABLE IF NOT EXISTS recommendation_history (
     workouts_json TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- -----------------------------------------------------------------------------
--- Seed Initial Data for Testing
--- -----------------------------------------------------------------------------
-INSERT INTO user_auth (id, email, password_hash, full_name, role)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'demo@mss.com', '$2a$10$e8wEaLq4H7N2ZtJ4wK9s.O2d9/1X3W0X9Y8Z7A6B5C4D3E2F1G0H', 'Nguyễn Văn Demo')
-ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO user_profiles (user_id, age, gender, height_cm, weight_kg, fitness_goal, activity_level, bmr, tdee, target_calories)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 25, 'MALE', 175.0, 70.0, 'LOSE_WEIGHT', 'MODERATELY_ACTIVE', 1680.0, 2604.0, 2104.0)
-ON CONFLICT (user_id) DO NOTHING;
-
-INSERT INTO food_blacklist (user_id, food_name, reason)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'cần tây', 'DISLIKE');
-
-INSERT INTO food_allergies (user_id, allergen, severity)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'SEAFOOD', 'HIGH');
