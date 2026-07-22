@@ -75,4 +75,34 @@ public class AuthService {
                 .tokenType("Bearer")
                 .build();
     }
+
+    public AuthResponse refreshToken(String refreshToken) {
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+        String userIdStr = jwtProvider.getUserIdFromToken(refreshToken);
+        String storedToken = redisTemplate.opsForValue().get("RT:" + userIdStr);
+
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token is no longer valid");
+        }
+
+        UserAuth user = userAuthRepository.findById(java.util.UUID.fromString(userIdStr))
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String newAccessToken = jwtProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name());
+        String newRefreshToken = jwtProvider.generateRefreshToken(user.getId());
+
+        // Token rotation: Replace old refresh token with new one
+        redisTemplate.opsForValue().set("RT:" + user.getId(), newRefreshToken, 7, TimeUnit.DAYS);
+
+        return AuthResponse.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .tokenType("Bearer")
+                .build();
+    }
 }
